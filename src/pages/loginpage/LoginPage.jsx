@@ -1,39 +1,41 @@
 import React, { use } from "react";
 import {useState} from 'react';
 import './LoginPage.css';
+import {useNavigate} from 'react-router-dom';
 
 export default function LoginPage() {
-  const [ username,setusername] = useState('');
-  const [ password,setpassword] = useState('');
+  const [ userName,setUserName] = useState('');
+  const [ password,setPassword] = useState('');
   const [message,setMessage] = useState('');
+  const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         
         e.preventDefault()
         
-        if(!username.trimEnd() || !password.trim()){
+        if(!userName.trimEnd() || !password.trim()){
             setMessage('Enter Username and Password');
+            return;
         }
 
         try{
-            const res = await fetch('/login', {
+            const res = await fetch('/api/login', {
             method: 'POST',
             headers: {'Content-Type' : 'application/json'},
-            body: JSON.stringify({username,password})
+            body: JSON.stringify({userName,password})
             })
 
             const data = await res.json();
             
             if (res.ok){
+                localStorage.setItem('token',data.token)// сохраняем JWT             
                 setMessage('Login Successful!')
-                setusername('');
-                setpassword('');
+                setUserName('');
+                setPassword('');
+                navigate('/')
             }else{
-                setMessage(data.error || 'Something went wrong');
+                setMessage(data.error || data.message ||'Something went wrong');
             }
-
-
-
         }catch(err){
            setMessage('Network Error');
         }
@@ -44,22 +46,24 @@ export default function LoginPage() {
     <div>
         <h1>Login Page</h1>
         
-        <form onSubmit={handleSubmit}>
-            <h2>Registration</h2>
+        <form onSubmit={handleSubmit} className="form">
+            <h2>Login</h2>
             <input 
+            className="inputs"
             type="text" 
             placeholder="Username"
-            value={username}
-            onChange={(e) =>  setusername(e.target.value)}
+            value={userName}
+            onChange={(e) =>  setUserName(e.target.value)}
             />
 
             <input
+            className="inputs"
              type="password"
               placeholder="Password"
               value={password}
-              onChange={ (e) => setpassword(e.target.value)}
+              onChange={ (e) => setPassword(e.target.value)}
             />
-            <button type="submit">Login</button>
+            <button type="submit" className="button1">Login</button>
             {message && <p>{message}</p>}
         </form>
     </div>

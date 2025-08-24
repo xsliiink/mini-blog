@@ -12,7 +12,7 @@ export default function AdminPage() {
 
   // Загрузка постов с сервера при монтировании
   useEffect(() => {
-    fetch('/posts')
+    fetch('/api/posts')
       .then(res => res.json())//получаем промис и преобразовываем его в json,чтобы создать массив данных
       .then(data => setPosts(data))
       .catch(console.error);
@@ -29,7 +29,7 @@ export default function AdminPage() {
     }
 
     try {
-      const res = await fetch('/posts', {
+      const res = await fetch('/api/posts', {
         method: 'POST',
         body: formData,
       });
@@ -46,7 +46,7 @@ export default function AdminPage() {
   // Лайкаем пост (PATCH запрос)
   const likePost = useCallback(async (id) => {
     try {
-      const res = await fetch(`/posts/${id}/like`, { method: 'PATCH' });
+      const res = await fetch(`/api/posts/${id}/like`, { method: 'PATCH' });
       const updatedPost = await res.json();
       setPosts(prev => prev.map(p => p.id === id ? updatedPost : p));//если id текущего поста совпадает с id поста, то заменяем его новым постом
     } catch (err) {
@@ -54,7 +54,16 @@ export default function AdminPage() {
     }
   }, [text,file]);
 
-  
+  const deletePost = useCallback(async (id) => {
+  try {
+    const res = await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Failed to delete post');
+
+    setPosts(prev => prev.filter(p => p.id !== id)); // убираем удаленный пост из списка
+  } catch (err) {
+    console.error(err);
+  }
+}, []);
 
 
   return (
@@ -84,6 +93,9 @@ export default function AdminPage() {
             )}
             <small>Лайков: {post.likes}</small><br/>
             <button onClick={() => likePost(post.id)}>Лайк</button>
+            <button onClick={() => deletePost(post.id)} style={{ marginLeft: 8, color: 'red' }}>
+              Удалить
+            </button>
           </li>
         ))}
       </ul>

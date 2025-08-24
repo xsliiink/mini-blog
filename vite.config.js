@@ -9,6 +9,7 @@ export default defineConfig({
       // все запросы, начинающиеся с /posts, будут проксироваться на http://localhost:3001
       '/posts': 'http://localhost:3001',
       '/uploads': 'http://localhost:3001',
+      '/api': 'http://localhost:3001',
     },
   },
 })

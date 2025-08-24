@@ -10,6 +10,8 @@ import fs from 'fs';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
 import wbt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -28,11 +30,43 @@ const storage = multer.diskStorage({
 })
 const upload = multer({ storage});
 
+// app.use((req,res,next) => {
+//   console.log('➡️ Request:', req.method, req.url);
+//   if (req.method !== 'GET') {
+//     console.log('📦 Body:', req.body);
+//   }
+//   next();
+// });
+
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(express.static('public'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+
+app.use((req,res,next) => {
+  console.log('➡️ Request:', req.method, req.url);
+  if (req.method !== 'GET') {
+    console.log('📦 Body:', req.body);
+  }
+  next();
+});
+
+function authMiddleware(req,res,next){
+  const authHeader = req.headers['authorization'];//достаем заголовок authorization
+  if(!authHeader) return res.status(401).json({error: 'No token'});
+
+  const token = authHeader.split(' ')[1];//токен состоит из двух частей: 'Bearer ' + токен, поэтому мы берем второй элемент массива
+  if (!token) return res.status(401).json({error: 'No token'});
+
+  try{
+    const decoded = wbt.verify(token,process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  }catch(err){
+    return res.status(403).json({error: 'Invalid token'})
+  }
+}
 
 
 //создаем таблицу в базе данных
@@ -46,7 +80,6 @@ let db;
   await db.run(`CREATE TABLE IF NOT EXISTS messages(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       text TEXT,
-      likes INTEGER DEFAULT 0,
       filename TEXT
 
   )`);
@@ -70,20 +103,58 @@ let db;
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       post_id INTEGER NOT NULL,
       user_id INTEGER NOT NULL,
-      type TEXT CHECK(type IN ('like','dislike')),
-      UNIQUE(post_id,user_id)
+      UNIQUE(post_id,user_id),
       FOREIGN KEY (post_id) REFERENCES messages (id),
       FOREIGN KEY (user_id) REFERENCES users (id)
       )`)
+
+  await db.run(`CREATE TABLE IF NOT EXISTS forum_messages(
+    text TEXT NOT NULL,
+    user_id INTEGER NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+     FOREIGN KEY (user_id) REFERENCES users (id)
+    
+    )`)
   
 })();
 
-app.get('/posts', async (req, res) => {//когда кто-то сделает fetch запрос,то выполнится эта функция
-  const posts = await db.all(`SELECT * FROM messages`);//db.all - SQL метод,для получения всех строк из таблицы
+app.get('/api/posts', async (req, res) => {//когда кто-то сделает fetch запрос,то выполнится эта функция
+  try{
+    const posts = await db.all(`
+   SELECT 
+      m.id,
+      m.text,
+      m.filename,
+      COUNT(pl.id) AS likes
+  FROM messages m
+  LEFT JOIN post_likes pl ON pl.post_id = m.id
+  GROUP BY m.id
+  ORDER BY m.id DESC
+    `);//db.all - SQL метод,для получения всех строк из таблицы
   res.json(posts);
+  }catch(err){
+    console.error('GET /api/posts error:',err);
+    res.status(500).json({error:'Internal server error'});
+  }
 });
 
-app.post('/posts',upload.single('file'),async (req,res) => {
+app.get('/api/forum',async (req,res) => {
+  try{
+    const forumMessages = await db.all(`
+      SELECT fm.id, fm.text, fm.created_at, u.username
+      FROM forum_messages fm
+      JOIN users u ON fm.user_id = u.id
+      ORDER BY fm.created_at ASC
+      `);
+    res.json(forumMessages);
+  }catch(err){
+    console.error('Failed to retrieve forum messages',err);
+    res.status(500).json({error:'Internal server error'});
+  }
+})
+
+app.post('/api/posts',upload.single('file'),async (req,res) => {
   const {text} = req.body;
   const file = req.file;
 
@@ -99,7 +170,7 @@ app.post('/posts',upload.single('file'),async (req,res) => {
   res.json({id: result.lastID, text, filename});
 });
 
-app.patch('/posts/:id/like',async(req,res) => {
+app.patch('/api/posts/:id/like',async(req,res) => {
   try{
     const {id} = req.params;//возьми из URL номер поста,id
     await db.run(
@@ -122,44 +193,178 @@ app.patch('/posts/:id/like',async(req,res) => {
   }
 })
 
-app.post('/register', async (req,res) =>{
-  const {username,password} = req.body;
+app.patch('/api/posts/:id/like2',authMiddleware, async(req,res) => {
+  const {id: post_id} = req.params;
+  const user_id = req.user.id;
 
-  if (!username || !password){
+  try{
+    const existing = await db.get(`
+        SELECT * FROM post_likes WHERE post_id = ? AND user_id = ?`,[post_id,user_id]
+      );
+
+      if(existing){
+          await db.run(
+            `DELETE FROM post_likes WHERE id = ?`,[existing.id]
+          );
+      } else{
+        await db.run(
+          `INSERT INTO post_likes (post_id,user_id) VALUES (?,?)`,
+          [post_id,user_id]
+        );
+      }
+
+      const likesCount = await db.get(
+        `SELECT COUNT(*) AS likes FROM post_likes WHERE post_id = ?`,
+        [post_id]
+      );
+      
+      res.json({post_id,likes: likesCount.likes});
+  }catch(err){
+          console.error('PATCH/posts/:id/like error:',err);
+        }
+});
+
+app.post('/api/posts/:id/comment',authMiddleware, async(req,res) => {
+  try{
+    const {id : post_id} = req.params;
+    const {text} = req.body;
+    const user_id = req.user.id;
+
+  if (!text || !user_id){
+    return res.status(400).json({error : 'Missing text or user_id'});
+  }
+
+  const post = await db.get(`SELECT * FROM messages WHERE id = ?`,[post_id]);
+  if (!post) return res.status(404).json({error : 'Post not found'});
+
+
+  const result = await db.run(
+    `INSERT INTO COMMENTS (post_id,user_id,text) VALUES (?,?,?)`,
+    [post_id,user_id,text]
+  );
+
+  const comment = await db.get(`SELECT * FROM comments WHERE id = ?`,[result.lastID]);
+  res.json(comment)
+  }catch(err){
+    console.error('POST/posts/:id/comment error:',err);
+    res.status(500).json({error:'server error'})
+  }
+})
+
+app.get('/api/posts/:id/comment',async (req,res) => {
+  try{
+    const { id : post_id} = req.params;//переменовыввем id в post_id для удобства
+    const comments = await db.all(
+      `SELECT c.id,c.text,c.user_id,u.username
+      from comments c 
+      JOIN users u ON c.user_id = u.id
+      WHERE c.post_id =  ?`,
+      [post_id]
+    );
+    res.json(comments);
+  }catch(err){
+    console.error('GET/posts/:id/comment error:',err);
+    res.status(500).json({error:'server error'})
+  }
+})
+
+app.post('/api/forum',authMiddleware,async (req,res) =>{
+  try{
+    const {id : comment_id} = req.params;
+    const user_id = req.user.id;
+    const {text} = req.body;
+
+    if(!text || !user_id){
+      return res.status(400).json({error: 'Missing text or user_id'});
+    }
+
+    const result = await db.run(
+      `INSERT INTO forum_messages (user_id,text) VALUES (?,?)`,
+      [user_id,text]
+    );
+
+    res.json({
+      id : result.lastID,
+      user_id,
+      text,
+      created_at : new Date().toISOString()
+    });
+  }catch(err){
+    console.error('Error inserting forum message:',err);
+    res.status(500).json({error: 'Internal server error'})
+  }
+  
+});
+
+app.post('/api/register', async (req,res) =>{
+  const {userName,password} = req.body;
+
+  if (!userName || !password){
     return res.status(400).json({error : 'Fill out all the fields'});
   }
 
-  const existingUser = await db.get(`SELECT * FROM users WHERE username = ?`,[username]);
+  const existingUser = await db.get(`SELECT * FROM users WHERE username = ?`,[userName]);
   if(existingUser){
     return res.status(400).json({error: 'user already exists'});
   }
 
   const hashedPassword = await bcrypt.hash(password,10);
 
-  await db.run(`INSERT INTO users (username,password) VALUES (?,?)`,[username,hashedPassword])
+  await db.run(`INSERT INTO users (username,password) VALUES (?,?)`,[userName,hashedPassword])
 
   res.json({message: 'user created!'});
 })
 
-app.post('/login', async (req,res) => {
-  const {username,password} = req.body;
+app.post('/api/login', async (req,res) => {
+  try{
+    const {userName,password} = req.body;
+    console.log('BODY:',req.body)
 
-  if(!username || !password){
+  if(!userName || !password){
     return res.status(400).json({error: 'Fill out all the fields'});
   }
 
 
   //looking for user in db
-  const user = await db.get(`SELECT * FROM users WHERE username = ?`,[username]);
+  const user = await db.get(`SELECT * FROM users WHERE username = ?`,[userName]);
+  console.log('user:',user)
   if (!user){
     return res.status(400).json({message: 'User not found'});
   }
 
   const isMatch = await bcrypt.compare(password,user.password);
-  if(!match){
-    return res.status(400).json({message : 'Invalid password'})
+  console.log('isMatch:',isMatch);
+  if(!isMatch){
+    return res.status(400).json({message : 'Invalid password'});
+  }
+
+
+  console.log('JWT_SECRET:', process.env.JWT_SECRET);
+  const token = wbt.sign(
+    {id : user.id,userName: user.username},
+    process.env.JWT_SECRET,
+    {expiresIn: '1h'}
+  );
+  console.log('Generated token:', token);
+
+  res.json({token});
+  }catch(err){
+    console.error('Login Error:',err);
+    res.status(500).json({error: 'Server error'})
   }
 })
+
+app.delete('/api/posts/:id', authMiddleware, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    await db.run('DELETE FROM messages WHERE id = ?', [id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('DELETE /posts/:id error:', err);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
 
 const PORT = 3001;
 app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));

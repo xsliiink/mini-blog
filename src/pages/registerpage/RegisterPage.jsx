@@ -19,10 +19,10 @@ export default function LoginPage(){
         }
 
         try{
-            const res = await fetch('/register',{
+            const res = await fetch('/api/register',{
                 method : 'POST',
                 headers: {'Content-Type' : 'application/json'},
-                body : JSON.stringify({username,password}),
+                body : JSON.stringify({userName,password}),
             });
         
             const data = await res.json();
@@ -52,7 +52,7 @@ export default function LoginPage(){
                 type="text"
                 placeholder='username'
                 value={userName} 
-                onChange={(e) => setUsername(e.target.value)}
+                onChange={(e) => setUserName(e.target.value)}
                 />
 
                 {/* Password field */}
