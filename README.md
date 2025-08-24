@@ -1,13 +1,80 @@
-# React + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# MiniBlog 📝
 
-Currently, two official plugins are available:
+A modern mini-blog built with **React + Vite** on the frontend and **Express + SQLite** on the backend.  
+Just install dependencies and run the servers — no configuration required.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+![MiniBlog Preview](./screenshots/home.png)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
-"# mini-blog" 
+## ⚡ Quick Start
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/xsliiink/mini-blog.git
+cd mini-blog
+````
+
+### 2. Install dependencies
+
+```bash
+npm install react react-dom react-router-dom lucide-react
+npm install express sqlite3 sqlite body-parser cors dotenv bcrypt jsonwebtoken jwt-decode multer
+npm install -D vite @vitejs/plugin-react eslint @eslint/js eslint-plugin-react-hooks eslint-plugin-react-refresh @types/react @types/react-dom globals
+```
+
+> This will install **all dependencies and devDependencies** required for frontend and backend.
+
+### 3. Run the backend server
+
+```bash
+node server.js
+```
+
+Server will run at: `http://localhost:3000`
+
+### 4. Run the frontend client
+
+```bash
+npm run dev
+```
+
+Client will run at: `http://localhost:5173`
+
+---
+
+## 📸 Screenshots
+
+### Home Page
+
+![Home Page](./screenshots/home.png)
+
+### Post Page
+
+![Post Page](./screenshots/post.png)
+
+### Login / Register
+
+![Login](./screenshots/login.png)
+
+### Dashboard / Create Post
+
+![Dashboard](./screenshots/dashboard.png)
+
+> You can also include GIFs to showcase interactions:
+>
+> ![MiniBlog Demo](./screenshots/demo.gif)
+
+---
+
+## 🌟 Contributing
+
+Feel free to fork this project and submit pull requests.
+
+---
+
+## 📄 License
+
+MIT License
