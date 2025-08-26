@@ -354,7 +354,7 @@ app.post('/api/login', async (req,res) => {
   }
 })
 
-app.delete('/api/posts/:id', authMiddleware, async (req, res) => {
+app.delete('/api/posts/:id', async (req, res) => {
   const { id } = req.params;
 
   try {

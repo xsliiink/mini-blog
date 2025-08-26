@@ -68,19 +68,19 @@ export default function AdminPage() {
 
   return (
     <div style={{ maxWidth: 600, margin: 'auto', padding: 20 }}>
-      <h1>Мини-блог</h1>
+      <h1>Mini-blog</h1>
       <div>
         <input
           ref={inputRef}
           value={text}
           onChange={e => setText(e.target.value)}
-          placeholder="Что нового?"
+          placeholder="What's new?"
           style={{ width: '80%', padding: 8 }}
           onKeyDown={e => { if (e.key === 'Enter') addPost(); }}
         />
         <input type="file" onChange={e => setFile(e.target.files[0])}/>
         <button onClick={addPost} style={{ padding: '8px 12px', marginLeft: 8 }}>
-          Добавить
+          Add
         </button>
       </div>
 
@@ -91,10 +91,10 @@ export default function AdminPage() {
             {post.filename && (
               <img  className = 'post-image 'src={`/uploads/${post.filename}`} alt="post" />
             )}
-            <small>Лайков: {post.likes}</small><br/>
-            <button onClick={() => likePost(post.id)}>Лайк</button>
+            <small>Likes: {post.likes}</small><br/>
+            <button onClick={() => likePost(post.id)}>Like</button>
             <button onClick={() => deletePost(post.id)} style={{ marginLeft: 8, color: 'red' }}>
-              Удалить
+              Delete
             </button>
           </li>
         ))}
