@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
-
+import { useNavigate } from 'react-router-dom';
 
 export default function AdminPage() {
   const [posts, setPosts] = useState([]); // Список постов
@@ -8,6 +8,7 @@ export default function AdminPage() {
   const[file,setFile] = useState(null);
   const inputRef = useRef(null);// Ссылка на input (для фокуса)
   const fileInputRef = useRef(null);
+  const navigate = useNavigate();
 
 
   // Загрузка постов с сервера при монтировании
@@ -18,8 +19,23 @@ export default function AdminPage() {
       .catch(console.error);
   }, []);
 
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if(!token){
+      navigate('/login')
+      return;
+    }
+
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if (payload.role !== 'admin'){
+      navigate('/')
+    }
+  },[navigate]);
+
   // Добавляем новый пост (POST запрос)
   const addPost = useCallback(async () => {
+    const token = localStorage.getItem('token');
     if (!text.trim()) return; // не отправляем пустой текст
 
     const formData = new FormData();
@@ -32,6 +48,9 @@ export default function AdminPage() {
       const res = await fetch('/api/posts', {
         method: 'POST',
         body: formData,
+        headers: {
+          'Authorization' : `Bearer ${token}`
+        }
       });
       const newPost = await res.json();
       setPosts(prev => [newPost, ...prev]); // добавляем в начало списка
@@ -44,26 +63,32 @@ export default function AdminPage() {
   }, [text]);
 
   // Лайкаем пост (PATCH запрос)
-  const likePost = useCallback(async (id) => {
+    const likePost = useCallback(async (id) => {
+      try {
+        const res = await fetch(`/api/posts/${id}/like`, { method: 'PATCH' });
+        const updatedPost = await res.json();
+        setPosts(prev => prev.map(p => p.id === id ? updatedPost : p));//если id текущего поста совпадает с id поста, то заменяем его новым постом
+      } catch (err) {
+        console.error(err);
+      }
+    }, [text,file]);
+
+    const deletePost = useCallback(async (id) => {
+      const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`/api/posts/${id}/like`, { method: 'PATCH' });
-      const updatedPost = await res.json();
-      setPosts(prev => prev.map(p => p.id === id ? updatedPost : p));//если id текущего поста совпадает с id поста, то заменяем его новым постом
+      const res = await fetch(`/api/posts/${id}`, {
+        method: 'DELETE',
+        headers : {
+          'Authorization' : `Bearer ${token}`,
+        }
+        });
+      if (!res.ok) throw new Error('Failed to delete post');
+
+      setPosts(prev => prev.filter(p => p.id !== id)); // убираем удаленный пост из списка
     } catch (err) {
       console.error(err);
     }
-  }, [text,file]);
-
-  const deletePost = useCallback(async (id) => {
-  try {
-    const res = await fetch(`/api/posts/${id}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error('Failed to delete post');
-
-    setPosts(prev => prev.filter(p => p.id !== id)); // убираем удаленный пост из списка
-  } catch (err) {
-    console.error(err);
-  }
-}, []);
+  }, []);
 
 
   return (

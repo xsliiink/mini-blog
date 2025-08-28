@@ -1,16 +1,63 @@
 /* Общий контейнер страницы */
+
+
+
+body {
+  font-family: 'Inter', 'Poppins', sans-serif;
+  background-color: #f5f5f5;
+  margin: 0;
+  padding: 0;
+}
+
+.header {
+  height: 60px;
+  display: flex;
+  justify-content: space-between; /* логотип слева, ссылки справа */
+  align-items: center;
+  padding: 0 24px;
+  background-color: grey; /* яркий синий фон */
+  color: white;              /* текст белый */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border-radius: 0 0 8px 8px;
+  margin-bottom: 20px;
+}
+
+.header .logo {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1;
+  height: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.header .nav-links a {
+  color: white;
+  text-decoration: none;
+  margin-left: 16px;
+  font-weight: 500;
+}
+
+.header .nav-links a:hover {
+  color: #dbe6f7; /* светлый при наведении */
+}
+
+
 .main-wrapper {
   width: 100%;
-  margin: 0 auto;    /* Центрируем */
-  padding: 20px;     /* Внутренние отступы */
+  margin: 0 auto;    
+  padding: 20px;     
   box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
 }
 
 /* Хедер и футер */
-.header, .footer {
+.footer {
   height: 60px;
   background-color: #f5f5f5;
   margin-bottom: 20px;
+  border-radius: 8px;
 }
 
 /* Сетка для контента и сайдбара */
@@ -28,36 +75,141 @@
 }
 
 .feed div {
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  word-wrap: break-word; /* Чтобы текст не вылезал */
+  padding: 16px;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  word-wrap: break-word;
 }
 
 .feed img {
-  max-width: 100%; /* Чтобы картинки не вылезали */
+  max-width: 100%;
   height: auto;
-  border-radius: 4px;
+  border-radius: 6px;
   margin-top: 8px;
 }
 
-/* Сайдбар */
-.sidebar {
+/* Кнопки с иконками */
+.button-with-icon, 
+.post-buttons button, 
+.add-message button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  background-color: #eee;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.button-with-icon:hover, 
+.post-buttons button:hover, 
+.add-message button:hover {
+  background-color: #ddd;
+}
+
+/* Контейнер кнопок поста */
+.post-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  justify-content: center; /* выравнивание по центру */
+}
+
+/* Секция комментариев */
+.comments-section {
+  background-color: #fafafa;
   padding: 12px;
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.comment {
+  padding: 4px 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid #eee;
+}
+
+/* Форма добавления комментария */
+.add-comment {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.add-comment input {
+  flex-grow: 1;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+/* Сайдбар и форум */
+.sidebar {
+  padding: 16px;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.forum {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.messages .message {
+  background-color: #f9f9f9;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+/* Форма добавления сообщений */
+.add-message {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.add-message input {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 14px;
   border: 1px solid #ddd;
   border-radius: 6px;
 }
 
-.add-message{
+.footer {
   display: flex;
-  gap: 8px;
+  justify-content: center;  /* Центрируем весь контент */
   align-items: center;
-  margin-top: 10px;
+  padding: 12px 20px;
+  gap: 20px;               /* Расстояние между текстом и иконками */
+  font-size: 14px;
+  color: #555;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.social-links a {
+  color: #555;
+  margin-left: 8px;
+  transition: color 0.2s;
+}
+
+.social-links a:hover {
+  color: #007bff; /* Синий при наведении */
 }
 
 /* Адаптив для маленьких экранов */
 @media (max-width: 768px) {
   .container {
-    grid-template-columns: 1fr; /* Сетка в одну колонку */
+    grid-template-columns: 1fr;
   }
 }

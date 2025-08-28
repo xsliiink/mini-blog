@@ -1,14 +1,55 @@
-.form{
-    max-width: 300px;
-    margin: auto;
-}
-.inputs{
-    width: 100%;
-    margin-bottom: 10px;
-    padding: 8px;
+.register-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.button1{
+.register-card {
+    width: 360px;
+    padding: 24px;
+    border-radius: 12px;
+    background-color: #fff;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.register-card h1 {
+    margin-bottom: 24px;
+    font-size: 24px;
+    color: #333;
+}
+
+.inputs {
     width: 100%;
-    padding: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+.button1 {
+    width: 100%;
+    padding: 12px;
+    background-color: #4a90e2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+.button1:hover {
+    background-color: #357ABD;
+}
+
+.login-message {
+    margin-top: 12px;
+    color: #e74c3c; /* красный для ошибок */
+    font-size: 14px;
 }

@@ -4,7 +4,11 @@ import * as jwt_decode from 'jwt-decode';
 import './Feed.css';
 import useAuth from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { MessageCircle } from 'lucide-react';
+import {FaPaperPlane,FaInstagram, FaTelegramPlane, FaLinkedinIn} from 'react-icons/fa';
+import { MdMessage } from 'react-icons/md'; // Простое облачко сообщений
+
+
+
 
 
 export default function Feed() {
@@ -141,7 +145,14 @@ export default function Feed() {
 
   return(
     <div className='main-wrapper'>
-        <div className="header"></div>
+        <div className="header">  
+          <div className="logo">MiniBlog</div>
+          <div className="nav-links">
+            <a href="/">Home</a>
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+          </div>
+        </div>
         <div className="container">
           <div className="feed">
             <h1>Feed</h1>
@@ -152,21 +163,24 @@ export default function Feed() {
                   <img src={`/uploads/${post.filename}`} alt="post" />
                 )}
                 {/* Кнопка комментаривев */}
-                <button
-                  className='comment-toggle'
-                  onClick={() => toggleComments(post.id)}
-                >
-                  <MessageCircle size ={20}/>Comments
-                </button>
                 
-                {/* Кнопка с лайками */}
+                <div className="post-buttons">
+                  <button
+                    className='comment-toggle button-with-icon'
+                    onClick={() => toggleComments(post.id)}
+                  >
+                    <MdMessage size ={20}/> Comments
+                  </button>
+                  
+                  {/* Кнопка с лайками */}
 
-                <button
-                  className='like-button'
-                  onClick={() => likePost(post.id)}
-                >
-                  ❤️ {post.likes}
-                </button>
+                  <button
+                    className='like-button'
+                    onClick={() => likePost(post.id)}
+                  >
+                    ❤️ {post.likes}
+                  </button>   
+                </div>
 
                 {/* Блок комментарииев.Показывается только,если открыт */}
                 {openComments[post.id] && (
@@ -186,13 +200,15 @@ export default function Feed() {
 
                       {/*Добавляем комментарии  */}
                     <div className="add-comment">
-                      <input type="text" 
+                      <div className="post-buttons">
+                        <input type="text" 
                         placeholder='Write a comment...'
                         value = {newComment[post.id] || ''}
                         onChange={ (e) => setNewComment({...newComment, [post.id] : e.target.value})
                       }
                       />
                       <button onClick={ () => addComment(post.id)}>Send</button>
+                      </div>
                     </div>
 
                   </div>
@@ -219,12 +235,29 @@ export default function Feed() {
                 onChange={(e) => setNewMessage(e.target.value)}
                 />
 
-                <button onClick={addMessage}></button>
+                <button onClick={addMessage} className='button-with-icon'>
+                  <FaPaperPlane size={15}/>
+                </button>
               </div>
             </div>
           </div>
         </div>
-        <div className="footer"></div>
+        <div className="footer">
+          <div className="social-links">
+            <a href="https://www.linkedin.com/" target="_blank" rel="noreferrer">
+              <FaLinkedinIn />
+            </a>
+            <a href="https://www.instagram.com/xsliiink/" target="_blank" rel="noreferrer">
+              <FaInstagram />
+            </a>
+            <a href="https://t.me/xsliiink" target="_blank" rel="noreferrer">
+              <FaTelegramPlane />
+            </a>
+          </div>
+          <div className="copyright">
+            &copy; 2025 Mini-blog. All rights reserved.
+          </div>
+        </div>
     </div>
   );
 }

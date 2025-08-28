@@ -41,31 +41,28 @@ export default function LoginPage(){
     };
     
     return(
-        <div style ={{maxWidth: 400, margin: 'auto',padding: 20 }}>
-            <h1>Registration page</h1>
-            <form onSubmit={handleSubmit} className='form'>
-                <h2>Registration</h2>
-                
-                {/* Username field */}
-                <input 
-                className='inputs'
-                type="text"
-                placeholder='username'
-                value={userName} 
-                onChange={(e) => setUserName(e.target.value)}
-                />
-
-                {/* Password field */}
-                <input
-                className='inputs'
-                 type="password"
-                 placeholder='password'
-                 value={password}
-                 onChange={(e) => setPassword(e.target.value)}
-                 />
-                 <button type='submit' className='button1'>Register</button>
-                 {message && <p>{message}</p>}
-            </form>
+        <div className="register-wrapper">
+            <div className="register-card">
+                <h1>Register</h1>
+                <form onSubmit={handleSubmit}>
+                    <input 
+                        type="text"
+                        placeholder="Username"
+                        value={userName}
+                        onChange={(e) => setUserName(e.target.value)}
+                        className="inputs"
+                    />
+                    <input 
+                        type="password"
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="inputs"
+                    />
+                    <button type="submit" className="button1">Register</button>
+                    {message && <p className="login-message">{message}</p>}
+                </form>
+            </div>
         </div>
     )
 }

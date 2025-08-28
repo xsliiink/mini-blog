@@ -68,6 +68,13 @@ function authMiddleware(req,res,next){
   }
 }
 
+function adminOnly(req,res,next){
+  if (req.user.role!= 'admin'){
+    return res.status(403).json({error: 'Forbidden admin only'});
+
+  }
+  next();
+}
 
 //создаем таблицу в базе данных
 let db;
@@ -76,6 +83,8 @@ let db;
     filename: './messages.db',
     driver: sqlite3.Database
   });
+
+  await db.run("UPDATE users SET role = 'admin' WHERE username = ?", ["xsliiink"]);
 
   await db.run(`CREATE TABLE IF NOT EXISTS messages(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -87,7 +96,8 @@ let db;
   await db.run(`CREATE TABLE IF NOT EXISTS users(
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       username TEXT NOT NULL UNIQUE,
-      password TEXT NOT NULL
+      password TEXT NOT NULL,
+      role TEXT NOT NULL DEFAULT 'user'
   )`);
 
   await db.run(`CREATE TABLE IF NOT EXISTS comments(
@@ -154,7 +164,7 @@ app.get('/api/forum',async (req,res) => {
   }
 })
 
-app.post('/api/posts',upload.single('file'),async (req,res) => {
+app.post('/api/posts',upload.single('file'),authMiddleware,adminOnly,async (req,res) => {
   const {text} = req.body;
   const file = req.file;
 
@@ -341,7 +351,7 @@ app.post('/api/login', async (req,res) => {
 
   console.log('JWT_SECRET:', process.env.JWT_SECRET);
   const token = wbt.sign(
-    {id : user.id,userName: user.username},
+    {id : user.id,userName: user.username,role : user.role},//нужно добавить роли для атуентификации админа
     process.env.JWT_SECRET,
     {expiresIn: '1h'}
   );
@@ -354,7 +364,7 @@ app.post('/api/login', async (req,res) => {
   }
 })
 
-app.delete('/api/posts/:id', async (req, res) => {
+app.delete('/api/posts/:id',authMiddleware, adminOnly, async (req, res) => {
   const { id } = req.params;
 
   try {
