@@ -51,19 +51,19 @@ A mini-blog with forum, posts, and likes. This project was created to practice R
 ## 🔹 Screenshots
 
 ### Main feed with posts and forum
-![feed](https://github.com/xsliiink/mini-blog/blob/bd3d1de376233f51ad6c776a47b1833b337d8053/screenshots/main.png)
+![feed](https://github.com/xsliiink/mini-blog/blob/bd3d1de376233f51ad6c776a47b1833b337d8053/screenshots/main2.png)
 
 ### Login form
-![Login](./screenshots/login.png)
+![Login](./screenshots/login2.png)
 
 ### Registration form
-![Register](./screenshots/register.png)
+![Register](./screenshots/register2.png)
 
 ### Admin page
-![Admin](./screenshots/admin.png)
+![Admin](./screenshots/admin2.png)
 
 ### Comments Section
-![Comments](./screenshots/comments.png)
+![Comments](./screenshots/comments2.png)
 
 ---
 
