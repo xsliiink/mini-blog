@@ -71,7 +71,7 @@ A mini-blog with forum, posts, and likes. This project was created to practice R
 
 1. Clone the repository:
 ```bash
-git clone <your-repository>
+git clone <https://github.com/xsliiink/mini-blog/edit/final-version>
 ````
 
 2. Install dependencies:
@@ -99,9 +99,9 @@ node server.js
 
 ## 🔹 Contacts & Social Links
 
-* LinkedIn: [your profile](https://www.linkedin.com/)
-* Instagram: [your profile](https://www.instagram.com/xsliiink)
-* Telegram: [your profile](https://t.me/xsliiink)
+* LinkedIn: [xsliiink](https://www.linkedin.com/)
+* Instagram: [xsliiink](https://www.instagram.com/xsliiink)
+* Telegram: [xsliiink](https://t.me/xsliiink)
 
 ```
 
